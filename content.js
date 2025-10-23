@@ -48,6 +48,40 @@ const KNOWN_SELECTORS = [
   '[data-automation-id="jobPostingDescription"], article, main, section'
 ];
 
+let ui = { host: null, shadow: null, banner: null };
+
+function getOrCreateUI() {
+  if (ui.banner && document.contains(ui.host)) return ui;
+
+  ui.host = document.createElement("div");
+  ui.host.id = "h1b-ui-host";
+  ui.host.style.position = "fixed";
+  ui.host.style.right = "16px";
+  ui.host.style.bottom = "16px";
+  ui.host.style.zIndex = "2147483647";
+  ui.host.style.pointerEvents = "none";
+
+  ui.shadow = ui.host.attachShadow({ mode: "open" });
+  ui.shadow.innerHTML = `
+    <style>
+      #banner { all: initial; display:inline-block; pointer-events:none;
+        padding:10px 14px; border-radius:10px; box-shadow:0 6px 20px rgba(0,0,0,.15);
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        font-size:13px; color:#fff; white-space:nowrap;
+      }
+      #banner[data-state="no"] { background:#c0352b; }
+      #banner[data-state="yes"] { background:#1f7a3f; }
+      #banner[data-state="unknown"] { background:#596677; }
+      #banner small { display:block; opacity:.9; margin-top:2px; font-size:11px; }
+    </style>
+    <div id="banner" data-state="unknown">UNKNOWN</div>
+  `;
+  ui.banner = ui.shadow.getElementById("banner");
+  document.documentElement.appendChild(ui.host);
+  return ui;
+}
+
+
 let phrases = { negative: [], positive: [] };
 let lastVerdict = "unknown";
 let debounceTimer = null;
@@ -136,41 +170,32 @@ function scanContainers() {
 }
 
 function paintUI(verdict, phrase, el) {
-  // Always create or update the banner (even if verdict didn't change)
-  let banner = document.getElementById("h1b-banner");
-  if (!banner) {
-    banner = document.createElement("div");
-    banner.id = "h1b-banner";
-    document.documentElement.appendChild(banner);
-  }
+    const { banner } = getOrCreateUI();
 
-  // Reset content and set state
+  // update the floating banner
   banner.setAttribute("data-state", verdict);
-  banner.textContent = verdict === "no" ? "WON’T SPONSOR"
-                   : verdict === "yes" ? "SPONSORSHIP LIKELY"
-                   : "UNKNOWN";
+  banner.innerHTML =
+    verdict === "no"
+      ? "WON’T SPONSOR"
+      : verdict === "yes"
+      ? "SPONSORSHIP LIKELY"
+      : "UNKNOWN";
   if (phrase) {
-    const sub = document.createElement("small");
-    sub.textContent = `Matched phrase: “${phrase}”`;
-    banner.appendChild(sub);
+    banner.innerHTML += `<small>Matched phrase: “${phrase}”</small>`;
   }
 
-  // Remove any previous outlines and add a new one if we matched an element
-  document.querySelectorAll(".h1b-outline").forEach(n => n.classList.remove("h1b-outline"));
-  if (el && el !== document.body) {
-    el.classList.add("h1b-outline");
-    const heading = el.querySelector("h1, h2, h3, [data-automation-id='jobPostingHeader']");
-    if (heading) {
-      const chip = document.createElement("span");
-      chip.className = "h1b-chip";
-      chip.textContent = verdict === "no" ? "WON’T SPONSOR"
-                       : verdict === "yes" ? "SPONSORSHIP LIKELY"
-                       : "UNKNOWN";
-      heading.appendChild(chip);
-    }
-  }
+  // --- Section 4: guard against re-appending outlines ---
+  // Remove old outlines
+  document
+    .querySelectorAll(".h1b-outline")
+    .forEach((n) => n.classList.remove("h1b-outline"));
 
-  // Always set the badge; update lastVerdict afterward
+  // Add outline only to the newly matched container
+  if (hitElement && hitElement !== document.body) {
+    hitElement.classList.add("h1b-outline");
+  }
+  // --- end Section 4 ---
+
   setBadge(verdict);
   lastVerdict = verdict;
 }

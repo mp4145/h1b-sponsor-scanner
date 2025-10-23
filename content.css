@@ -29,13 +29,3 @@
   outline-offset: 2px;
   border-radius: 6px;
 }
-
-.h1b-chip {
-  display: inline-block;
-  margin-left: 6px;
-  padding: 1px 6px;
-  border-radius: 999px;
-  font-size: 11px;
-  color: #fff;
-  background: #c0352b;
-}
