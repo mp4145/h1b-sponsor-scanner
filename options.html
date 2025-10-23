@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>H1B Sponsor Scanner – Options</title>
+    <style>
+      body { font: 14px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; padding: 24px; }
+      textarea { width: 100%; height: 140px; font: 13px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+      label { display: block; margin: 12px 0 6px; font-weight: 600; }
+      .row { margin-bottom: 18px; }
+      button { padding: 8px 12px; border-radius: 8px; border: 1px solid #ccc; background: #fff; cursor: pointer; }
+      .hint { font-size: 12px; color: #555; }
+      .success { color: #1f7a3f; margin-left: 8px; font-weight: 600; }
+    </style>
+  </head>
+  <body>
+    <h1>H1B Sponsor Scanner – Options</h1>
+
+    <div class="row">
+      <label for="negative">Phrases that mean “won’t sponsor”</label>
+      <textarea id="negative" placeholder="One phrase per line"></textarea>
+      <div class="hint">Examples: no visa sponsorship, unable to sponsor, must be authorized to work without sponsorship</div>
+    </div>
+
+    <div class="row">
+      <label for="positive">Phrases that mean “will sponsor”</label>
+      <textarea id="positive" placeholder="One phrase per line"></textarea>
+      <div class="hint">Examples: visa sponsorship available, we sponsor visas, H-1B sponsorship available</div>
+    </div>
+
+    <button id="save">Save</button><span id="saved" class="success" style="display:none;">Saved</span>
+
+    <script src="options.js"></script>
+  </body>
+</html>
